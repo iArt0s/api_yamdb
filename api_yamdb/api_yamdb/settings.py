@@ -16,7 +16,6 @@ ALLOWED_HOSTS = ['*']
 
 
 INSTALLED_APPS = [
-    # 'users.apps.UsersConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,6 +24,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'reviews',
+    'api',
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -107,3 +109,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 AUTH_USER_MODEL = 'users.User'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5,
+
+    # 'DEFAULT_PERMISSION_CLASSES': [
+    #     'rest_framework.permissions.AllowAny',
+    # ]
+}
