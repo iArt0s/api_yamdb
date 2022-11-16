@@ -1,16 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status, permissions, generics, filters
 from django.core.mail import send_mail
-
-from .mixins import ListCreateDestroyViewSet
-from .permissions import IsAdminOrReadOnly
+from django.shortcuts import get_object_or_404
+from .mixins import ListCreateDestroyViewSet, GetPatchViewSet
+from .permissions import IsAdminOrReadOnly,OnlyAdmin,OnlyUser
 from reviews.models import Category, Genre, Title
 from .serializers import (
     GenreSerializer,
     CategorySerializer,
     TitleUnSafeMethodsSerializer,
     TitleSafeMethodsSerializer,
-    RegisterSerializer, VerifySerializer
+    RegisterSerializer, VerifySerializer,UserSerializer,SelfUserSerializer
 )
 from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
@@ -21,6 +21,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class GenreViewSet(ListCreateDestroyViewSet):
     """Набор представлений для обработки экземпляров модели Genre."""
     queryset = Genre.objects.all()
+    lookup_field=('slug')
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
@@ -30,6 +31,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 class CategoryViewSet(ListCreateDestroyViewSet):
     """Набор представлений для обработки экземпляров модели Category."""
     queryset = Category.objects.all()
+    lookup_field=('slug')
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (filters.SearchFilter,)
@@ -84,3 +86,18 @@ class VerifyUserView(generics.GenericAPIView):
         user.save()
         refresh = RefreshToken.for_user(user)
         return Response({'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (OnlyAdmin,)
+    serializer_class=UserSerializer
+    queryset=User.objects.all() 
+    filter_backends = (DjangoFilterBackend,) 
+    lookup_field=('username')      
+
+
+class SelfUserViewSet(viewsets.ModelViewSet):
+    serializer_class=SelfUserSerializer
+    permission_classes = (OnlyUser,)
+    def get_queryset(self):
+        return User.objects.filter(username=self.request.user.username)

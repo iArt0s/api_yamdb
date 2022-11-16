@@ -51,9 +51,8 @@ class Title(models.Model):
         blank=True,
         verbose_name='Краткое содержание',
     )
-    genre = models.ForeignKey(
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
         verbose_name='Жанр произведения',
         null=True,
         related_name='genres',

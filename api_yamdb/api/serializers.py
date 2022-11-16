@@ -72,3 +72,28 @@ class TitleSafeMethodsSerializer(serializers.ModelSerializer):
             'genre',
             'category',
         )
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User  
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )   
+
+class SelfUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User  
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+        )   
