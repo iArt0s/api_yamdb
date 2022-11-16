@@ -10,3 +10,5 @@ class User(AbstractUser):
     is_active = models.BooleanField(
         default=False,
     )
+    role = models.ManyToManyField('user', 'admin', 'moderator')
+    

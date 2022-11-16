@@ -126,6 +126,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-PASSWORD_RESET_TIMEOUT = 5
+
 
 

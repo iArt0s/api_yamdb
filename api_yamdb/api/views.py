@@ -51,9 +51,6 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleSafeMethodsSerializer
 
 
-
-
-
 class RegisterView(viewsets.ModelViewSet):
     serializer_class = RegisterSerializer
     permission_classes = (permissions.AllowAny,)
@@ -80,10 +77,10 @@ class VerifyUserView(generics.GenericAPIView):
 
     def post(self, serializer):
         verify_code = serializer.data.get('confirmation_code')
-        user= User.objects.get(username=serializer.data.get('username'))
-        if not default_token_generator.check_token(user, verify_code): 
-            return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST) 
-        user.is_active=True
+        user = User.objects.get(username=serializer.data.get('username'))
+        if not default_token_generator.check_token(user, verify_code):
+            return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST)
+        user.is_active = True
         user.save()
         refresh = RefreshToken.for_user(user)
-        return Response({'access':str(refresh.access_token)}, status=status.HTTP_200_OK)
+        return Response({'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
