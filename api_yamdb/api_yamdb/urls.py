@@ -14,7 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+<<<<<<< HEAD
 from django.urls import path, include
+=======
+from django.urls import include, path
+>>>>>>> develop
 from django.views.generic import TemplateView
 
 
@@ -32,9 +36,11 @@ router_v1.register('signup', RegisterView, basename='signup')
 urlpatterns = [
     path('', include('api.urls')),
     path('admin/', admin.site.urls),
+    path('api/', include('api.urls')),
     path(
         'redoc/',
         TemplateView.as_view(template_name='redoc.html'),
         name='redoc'
     ),
+
 ]
