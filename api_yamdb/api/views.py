@@ -1,6 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
-from rest_framework import viewsets
+from rest_framework import viewsets, status, permissions, generics, filters
+from django.core.mail import send_mail
 
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdminOrReadOnly
@@ -10,7 +10,12 @@ from .serializers import (
     CategorySerializer,
     TitleUnSafeMethodsSerializer,
     TitleSafeMethodsSerializer,
+    RegisterSerializer, VerifySerializer
 )
+from rest_framework.response import Response
+from django.contrib.auth.tokens import default_token_generator
+from users.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -44,14 +49,9 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleUnSafeMethodsSerializer
 
         return TitleSafeMethodsSerializer
-        
-from rest_framework import viewsets, status, permissions, generics
-from .serializers import RegisterSerializer, VerifySerializer
-from users.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.mail import send_mail
-from rest_framework.response import Response
-from django.contrib.auth.tokens import default_token_generator
+
+
+
 
 
 class RegisterView(viewsets.ModelViewSet):
