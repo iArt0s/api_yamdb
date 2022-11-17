@@ -8,20 +8,26 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS or request.user.role == 'admin':
             return True
 
+
 class OnlyUser(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method == ('GET' or 'PATCH'):
+        if request.user.is_authenticated and request.method == ('GET' or 'PATCH'):
             return True
+
 
 class OnlyAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if request.user.role == 'admin':
-            return True     
+        if request.user.is_authenticated and (request.user.role == 'admin' or request.user.is_staff is True):
+            return True
 
 
+class OnlyAdmin1(permissions.BasePermission):
 
-
+    def has_object_permission(self, request, view, obj):
+        return (obj.username == self.request.user.username)
+        
+            
 
 
 # class IsOwnerOrReadOnly(permissions.BasePermission):

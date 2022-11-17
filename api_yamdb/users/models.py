@@ -14,7 +14,7 @@ class User(AbstractUser):
     confirmation_code = models.CharField(
         max_length=300, unique=True, blank=False, null=True)
     is_active = models.BooleanField(
-        default=False,
+        default=True,
     )
     role = models.CharField(max_length=20, choices=ROLE, default='user')
 
