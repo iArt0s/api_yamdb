@@ -73,10 +73,11 @@ class TitleSafeMethodsSerializer(serializers.ModelSerializer):
             'category',
         )
 
+
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User  
+        model = User
         fields = (
             'username',
             'email',
@@ -84,16 +85,19 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'bio',
             'role',
-        )   
+        )
+
 
 class SelfUserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = User  
+        model = User
         fields = (
             'username',
             'email',
             'first_name',
             'last_name',
             'bio',
-        )   
+            'role',
+        )
+        read_only_fields = ('role',)
