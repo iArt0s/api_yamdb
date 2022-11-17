@@ -1,7 +1,20 @@
 from rest_framework import serializers
+from users.models import User
 from rest_framework.relations import SlugRelatedField
 
 from reviews.models import Category, Genre, Title
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'username']
+
+
+class VerifySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'confirmation_code']
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -59,3 +72,28 @@ class TitleSafeMethodsSerializer(serializers.ModelSerializer):
             'genre',
             'category',
         )
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User  
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+            'role',
+        )   
+
+class SelfUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User  
+        fields = (
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'bio',
+        )   
