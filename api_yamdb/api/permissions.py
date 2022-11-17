@@ -5,7 +5,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     """Класс Permission, ограничивающий доступ к UnSAFE methods"""
 
     def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS or request.user.role == 'A':
+        if request.method in permissions.SAFE_METHODS or request.user.role == 'admin':
             return True
 
 class OnlyUser(permissions.BasePermission):
@@ -16,7 +16,7 @@ class OnlyUser(permissions.BasePermission):
 class OnlyAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if request.user.role == 'A':
+        if request.user.role == 'admin':
             return True     
 
 

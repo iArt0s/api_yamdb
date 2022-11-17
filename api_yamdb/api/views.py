@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import api_view
 from rest_framework import viewsets, status, permissions, generics, filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -96,8 +97,14 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field=('username')      
 
 
-class SelfUserViewSet(viewsets.ModelViewSet):
-    serializer_class=SelfUserSerializer
-    permission_classes = (OnlyUser,)
-    def get_queryset(self):
-        return User.objects.filter(username=self.request.user.username)
+@api_view(['GET', 'PATCH'])
+def SelfUserViewSet(request):
+    user=User.objects.get(username=request.user.username)
+    if request.method == 'PATCH':
+        serializer = SelfUserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    serializer=SelfUserSerializer(user)    
+    return Response(serializer.data)
