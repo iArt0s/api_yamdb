@@ -96,7 +96,7 @@ class VerifyUserView(generics.GenericAPIView):
         if 'username' not in serializer.data:
             return Response({'error': 'Запрос без username'}, status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(
-                User, username=serializer.data.get('username'))
+            User, username=serializer.data.get('username'))
         if not default_token_generator.check_token(user, verify_code):
             return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST)
         user.is_active = True
@@ -148,13 +148,13 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-#ПРОБЛЕМА С IsAuthOrReadOnly
+# ПРОБЛЕМА С IsAuthOrReadOnly
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для ревью."""
     serializer_class = ReviewSerializer
-    # permission_classes = (IsAuthOrReadOnly,)
-    permission_classes = (OnlyAdmin1,)
+    #permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -168,9 +168,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Viewset для комментариев."""
-    serializer_class = CommentSerializer
-    # permission_classes = (IsAuthOrReadOnly,)
     permission_classes = (OnlyAdmin1,)
+    serializer_class = CommentSerializer
+    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')

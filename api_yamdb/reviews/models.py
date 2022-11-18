@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from users.models import User
 
-User = get_user_model()
+
 
 
 class Genre(models.Model):
