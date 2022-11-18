@@ -118,6 +118,15 @@ class Review(models.Model):
         db_index=True
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='nonunique_review_constraint'
+            )
+        ]
+
+
 
 class Comment(models.Model):
     """Модель комментариев."""
