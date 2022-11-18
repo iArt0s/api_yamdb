@@ -154,7 +154,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для ревью."""
     serializer_class = ReviewSerializer
     # permission_classes = (IsAuthOrReadOnly,)
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (OnlyAdmin1,)
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -170,7 +170,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Viewset для комментариев."""
     serializer_class = CommentSerializer
     # permission_classes = (IsAuthOrReadOnly,)
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (OnlyAdmin1,)
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')
