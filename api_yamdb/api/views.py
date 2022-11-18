@@ -11,7 +11,8 @@ from .serializers import (
     CategorySerializer,
     TitleUnSafeMethodsSerializer,
     TitleSafeMethodsSerializer,
-    RegisterSerializer, VerifySerializer, UserSerializer, SelfUserSerializer
+    RegisterSerializer, VerifySerializer, UserSerializer, SelfUserSerializer,
+    ReviewSerializer, CommentSerializer
 )
 from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
@@ -152,7 +153,8 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для ревью."""
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthOrReadOnly,)
+    # permission_classes = (IsAuthOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -167,7 +169,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Viewset для комментариев."""
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthOrReadOnly,)
+    # permission_classes = (IsAuthOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')
