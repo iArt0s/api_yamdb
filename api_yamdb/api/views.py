@@ -18,6 +18,7 @@ from django.contrib.auth.tokens import default_token_generator
 from users.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
+from .filters import TitleFilter
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -46,15 +47,13 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleUnSafeMethodsSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
+    filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return TitleUnSafeMethodsSerializer
 
         return TitleSafeMethodsSerializer
-
-
 
 
 class RegisterView(viewsets.ModelViewSet):
@@ -64,6 +63,8 @@ class RegisterView(viewsets.ModelViewSet):
     def create(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if request.data['username'] == 'me':
+            return Response({'error': 'Нельзя создать пользователя с username "me" '}, status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         user_data = serializer.data
         # user=User.objects.filter(email=user_data['email'])
@@ -88,7 +89,13 @@ class VerifyUserView(generics.GenericAPIView):
 
     def post(self, serializer):
         verify_code = serializer.data.get('confirmation_code')
-        user = User.objects.get(username=serializer.data.get('username'))
+        print(serializer.data)
+        if serializer.data == {}:
+            return Response({'error': 'Запрос без параметров'}, status=status.HTTP_400_BAD_REQUEST)
+        if 'username' not in serializer.data:
+            return Response({'error': 'Запрос без username'}, status=status.HTTP_400_BAD_REQUEST)
+        user = get_object_or_404(
+                User, username=serializer.data.get('username'))
         if not default_token_generator.check_token(user, verify_code):
             return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST)
         user.is_active = True
@@ -135,8 +142,6 @@ class UserViewSet(viewsets.ModelViewSet):
     def destroy(self, request, username):
         if 'me' == username:
             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        user = User.objects.get(username=username)   
-        user.delete() 
-        return Response(status=status.HTTP_204_NO_CONTENT)    
-
-        
+        user = User.objects.get(username=username)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

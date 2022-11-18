@@ -22,7 +22,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -30,7 +30,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'name', 'slug')
+        fields = ('name', 'slug')
 
 
 class TitleUnSafeMethodsSerializer(serializers.ModelSerializer):
@@ -58,6 +58,7 @@ class TitleSafeMethodsSerializer(serializers.ModelSerializer):
     списка, состоящего из привязанных к нему объектов Genre и Category
     вместо ссылок на данные объекты.
     """
+    
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
 
