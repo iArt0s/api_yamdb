@@ -25,7 +25,7 @@ class OnlyAdmin(permissions.BasePermission):
 class OnlyAdmin1(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return (request.method == ('POST') and request.user.is_authenticated or request.user.is_authenticated and (request.method is 'DELETE' or 'PATCH' and request.user == obj.author or request.user.role == ('moderator' or 'admin') or request.user.is_staff is True)) or request.method == ('GET')
+        return (request.method is 'DELETE' or 'PATCH' and request.user.is_authenticated and (request.user == obj.author or request.user.role == ('moderator' or 'admin') or request.user.is_staff is True) or request.method == ('GET'))
 
 
 # class IsOwnerOrReadOnly(permissions.BasePermission):
