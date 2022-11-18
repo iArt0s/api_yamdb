@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from .mixins import ListCreateDestroyViewSet, GetPatchViewSet
 from .permissions import IsAdminOrReadOnly, OnlyAdmin, OnlyUser, OnlyAdmin1
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 from .serializers import (
     GenreSerializer,
     CategorySerializer,
