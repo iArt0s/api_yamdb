@@ -6,9 +6,9 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if (request.method in permissions.SAFE_METHODS
-            or request.user.is_authenticated and (
-                request.user.role == 'admin'
-                or request.user.is_staff is True)):
+                or request.user.is_authenticated and (
+                        request.user.role == 'admin'
+                        or request.user.is_staff is True)):
             return True
 
 
