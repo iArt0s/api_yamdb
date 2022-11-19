@@ -10,13 +10,3 @@ class ListCreateDestroyViewSet(
     """Сборный вьюсет для обработки экземпляров моделей Category, Genre."""
 
     pass
-
-
-class GetPatchViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-):
-
-    pass
-

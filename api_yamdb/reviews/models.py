@@ -1,12 +1,9 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 
 from users.models import User
-
-
 
 
 class Genre(models.Model):
@@ -121,7 +118,6 @@ class Review(models.Model):
                 name='nonunique_review_constraint'
             )
         ]
-
 
 
 class Comment(models.Model):

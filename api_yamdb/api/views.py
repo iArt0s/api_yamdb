@@ -1,11 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
-from rest_framework.decorators import api_view, action
 from rest_framework import viewsets, status, permissions, generics, filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from .mixins import ListCreateDestroyViewSet, GetPatchViewSet
-from .permissions import IsAdminOrReadOnly, OnlyAdmin, OnlyUser, OnlyAdmin1
+from .mixins import ListCreateDestroyViewSet
+from .permissions import IsAdminOrReadOnly, OnlyAdmin, OnlyAdmin1
 from reviews.models import Category, Genre, Title, Review, Comment
 from .serializers import (
     GenreSerializer,
@@ -19,9 +18,7 @@ from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
 from users.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.http import JsonResponse
 from .filters import TitleFilter
-
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -73,12 +70,14 @@ class RegisterView(viewsets.ModelViewSet):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if request.data['username'] == 'me':
-            return Response({'error': 'Нельзя создать пользователя с username "me" '}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'error': 'Нельзя создать пользователя с username "me" '},
+                status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
         user_data = serializer.data
-        # user=User.objects.filter(email=user_data['email'])
-        # user.is_active = False
-        # user.save()
+        user = User.objects.get(email=user_data['email'])
+        user.is_active = False
+        user.save()
         user_mail = User.objects.get(email=user_data['email'])
         user_name = User.objects.get(username=user_data['username'])
         token = default_token_generator.make_token(user_name)
@@ -100,17 +99,21 @@ class VerifyUserView(generics.GenericAPIView):
         verify_code = serializer.data.get('confirmation_code')
         print(serializer.data)
         if serializer.data == {}:
-            return Response({'error': 'Запрос без параметров'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Запрос без параметров'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if 'username' not in serializer.data:
-            return Response({'error': 'Запрос без username'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Запрос без username'},
+                            status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(
             User, username=serializer.data.get('username'))
         if not default_token_generator.check_token(user, verify_code):
-            return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': f'Код подтверждения неверный!'},
+                            status=status.HTTP_400_BAD_REQUEST)
         user.is_active = True
         user.save()
         refresh = RefreshToken.for_user(user)
-        return Response({'access': str(refresh.access_token)}, status=status.HTTP_200_OK)
+        return Response({'access': str(refresh.access_token)},
+                        status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -133,7 +136,8 @@ class UserViewSet(viewsets.ModelViewSet):
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
         user = User.objects.get(username=username)
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -156,13 +160,10 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# ПРОБЛЕМА С IsAuthOrReadOnly
-
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для ревью."""
     serializer_class = ReviewSerializer
-    #permission_classes = (permissions.IsAuthenticated,)
-    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (OnlyAdmin1, permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -178,7 +179,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Viewset для комментариев."""
     permission_classes = (OnlyAdmin1,)
     serializer_class = CommentSerializer
-    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (OnlyAdmin1, permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')
