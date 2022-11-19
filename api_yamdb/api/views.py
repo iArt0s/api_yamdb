@@ -1,8 +1,13 @@
-from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Avg
-from rest_framework import viewsets, status, permissions, generics, filters
+from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status, permissions, generics, filters
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+
+from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdminOrReadOnly, OnlyAdmin, ReviewAndComment
 from reviews.models import Category, Genre, Title, Review, Comment
@@ -11,14 +16,14 @@ from .serializers import (
     CategorySerializer,
     TitleUnSafeMethodsSerializer,
     TitleSafeMethodsSerializer,
-    RegisterSerializer, VerifySerializer, UserSerializer, SelfUserSerializer,
-    ReviewSerializer, CommentSerializer
+    RegisterSerializer,
+    VerifySerializer,
+    UserSerializer,
+    SelfUserSerializer,
+    ReviewSerializer,
+    CommentSerializer,
 )
-from rest_framework.response import Response
-from django.contrib.auth.tokens import default_token_generator
 from users.models import User
-from rest_framework_simplejwt.tokens import RefreshToken
-from .filters import TitleFilter
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -63,6 +68,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class RegisterView(viewsets.ModelViewSet):
+    """Набор представлений для обработки регистрации пользователей."""
     serializer_class = RegisterSerializer
     permission_classes = (permissions.AllowAny,)
 
@@ -88,10 +94,12 @@ class RegisterView(viewsets.ModelViewSet):
             recipient_list=[user_mail.email],
             fail_silently=False,
         )
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class VerifyUserView(generics.GenericAPIView):
+    """Обработчик для проверки аутентификации пользователей."""
     permission_classes = (permissions.AllowAny,)
     serializer_class = VerifySerializer
 
@@ -107,16 +115,18 @@ class VerifyUserView(generics.GenericAPIView):
         user = get_object_or_404(
             User, username=serializer.data.get('username'))
         if not default_token_generator.check_token(user, verify_code):
-            return Response({'error': f'Код подтверждения неверный!'},
+            return Response({'error': 'Код подтверждения неверный!'},
                             status=status.HTTP_400_BAD_REQUEST)
         user.is_active = True
         user.save()
         refresh = RefreshToken.for_user(user)
+
         return Response({'access': str(refresh.access_token)},
                         status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """Набор представлений для обработки экземпляров модели User."""
     queryset = User.objects.all()
     permission_classes = (OnlyAdmin,)
     serializer_class = UserSerializer
@@ -142,7 +152,9 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+
             return Response(serializer.data)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, username):
@@ -161,9 +173,11 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    """Viewset для ревью."""
+    """Набор представлений для обработки экземпляров модели Review."""
     serializer_class = ReviewSerializer
-    permission_classes = (ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -176,10 +190,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """Viewset для комментариев."""
+    """Набор представлений для обработки экземпляров модели Comment."""
     permission_classes = (ReviewAndComment,)
     serializer_class = CommentSerializer
-    permission_classes = (ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (
+        ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
+    )
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')

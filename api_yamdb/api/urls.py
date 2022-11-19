@@ -1,6 +1,9 @@
-from rest_framework import routers
 from django.urls import include, path
-from .views import (RegisterView, VerifyUserView, CategoryViewSet,
+from rest_framework import routers
+
+from .views import (RegisterView,
+                    VerifyUserView,
+                    CategoryViewSet,
                     GenreViewSet,
                     TitleViewSet,
                     UserViewSet,
