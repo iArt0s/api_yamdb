@@ -12,7 +12,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 
@@ -61,7 +60,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'api_yamdb.wsgi.application'
 
-
 # Database
 
 DATABASES = {
@@ -70,7 +68,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Password validation
 
@@ -89,7 +86,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
@@ -102,7 +98,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
@@ -113,26 +108,23 @@ AUTH_USER_MODEL = 'users.User'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails') 
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 5,
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated', 
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 SIMPLE_JWT = {
-   'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
-   'AUTH_HEADER_TYPES': ('Bearer',),
-} 
-
-
-
-
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=3),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}

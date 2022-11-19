@@ -3,7 +3,6 @@ from django.db import models
 
 
 class User(AbstractUser):
-
     ROLE = [
         ('moderator', 'Модератор'),
         ('user', 'Пользователь'),
