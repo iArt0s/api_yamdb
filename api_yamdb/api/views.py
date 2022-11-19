@@ -4,7 +4,7 @@ from rest_framework import viewsets, status, permissions, generics, filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from .mixins import ListCreateDestroyViewSet
-from .permissions import IsAdminOrReadOnly, OnlyAdmin, OnlyAdmin1
+from .permissions import IsAdminOrReadOnly, OnlyAdmin, ReviewAndComment
 from reviews.models import Category, Genre, Title, Review, Comment
 from .serializers import (
     GenreSerializer,
@@ -163,7 +163,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для ревью."""
     serializer_class = ReviewSerializer
-    permission_classes = (OnlyAdmin1, permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('title_id')
@@ -177,9 +177,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Viewset для комментариев."""
-    permission_classes = (OnlyAdmin1,)
+    permission_classes = (ReviewAndComment,)
     serializer_class = CommentSerializer
-    permission_classes = (OnlyAdmin1, permissions.IsAuthenticatedOrReadOnly,)
+    permission_classes = (ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,)
 
     def get_queryset(self):
         pk = self.kwargs.get('review_id')

@@ -25,7 +25,7 @@ class OnlyAdmin(permissions.BasePermission):
             return True
 
 
-class OnlyAdmin1(permissions.BasePermission):
+class ReviewAndComment(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         return (
