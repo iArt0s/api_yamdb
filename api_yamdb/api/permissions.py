@@ -30,9 +30,10 @@ class OnlyAdmin(permissions.BasePermission):
 class ReviewAndComment(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return (
-            request.method == 'DELETE' or 'PATCH'
-            and request.user.is_authenticated
-            and (request.user == obj.author or request.user.role == (
-                'moderator' or 'admin') or request.user.is_staff is True)
-            or request.method == ('GET'))
+        admin = (request.user.is_authenticated
+                 and (request.user == obj.author
+                      or request.user.role == ('moderator' or 'admin')
+                      or request.user.is_staff is True))
+        return (request.method == 'DELETE' and admin
+                or request.method == 'PATCH' and admin
+                or request.method == ('GET'))
