@@ -70,10 +70,6 @@ class Title(models.Model):
         null=True,
         verbose_name='Категория произведения',
     )
-    rating = models.IntegerField(
-        null=True,
-        verbose_name='Рейтинг произведения',
-    )
 
     def validate_year(value):
         """Метод, позволяющий отследить корректный год выпуска произведения."""

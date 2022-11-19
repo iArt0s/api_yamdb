@@ -59,9 +59,9 @@ class TitleSafeMethodsSerializer(serializers.ModelSerializer):
     списка, состоящего из привязанных к нему объектов Genre и Category
     вместо ссылок на данные объекты.
     """
-
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
+    rating = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -133,6 +133,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев."""
     author = SlugRelatedField(slug_field='username', read_only=True)
+    # review = serializers.SlugRelatedField(
+    #     slug_field='text',
+    #     read_only=True
+    # )
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
