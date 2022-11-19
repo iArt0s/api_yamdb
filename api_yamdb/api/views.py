@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Avg
 from rest_framework.decorators import api_view, action
 from rest_framework import viewsets, status, permissions, generics, filters
 from django.core.mail import send_mail
@@ -20,6 +21,7 @@ from users.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.http import JsonResponse
 from .filters import TitleFilter
+
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -44,7 +46,6 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Набор представлений для обработки экземпляров модели Title."""
-    queryset = Title.objects.all()
     serializer_class = TitleUnSafeMethodsSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
@@ -55,6 +56,13 @@ class TitleViewSet(viewsets.ModelViewSet):
             return TitleUnSafeMethodsSerializer
 
         return TitleSafeMethodsSerializer
+
+    def get_queryset(self):
+        if self.action in ('retrieve', 'list'):
+            return Title.objects.prefetch_related(
+                'reviews').all().annotate(rating=Avg('reviews__score'))
+
+        return Title.objects.all()
 
 
 class RegisterView(viewsets.ModelViewSet):
