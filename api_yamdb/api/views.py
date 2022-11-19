@@ -5,13 +5,14 @@ from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from .mixins import ListCreateDestroyViewSet, GetPatchViewSet
 from .permissions import IsAdminOrReadOnly, OnlyAdmin, OnlyUser, OnlyAdmin1
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 from .serializers import (
     GenreSerializer,
     CategorySerializer,
     TitleUnSafeMethodsSerializer,
     TitleSafeMethodsSerializer,
-    RegisterSerializer, VerifySerializer, UserSerializer, SelfUserSerializer
+    RegisterSerializer, VerifySerializer, UserSerializer, SelfUserSerializer,
+    ReviewSerializer, CommentSerializer
 )
 from rest_framework.response import Response
 from django.contrib.auth.tokens import default_token_generator
@@ -95,7 +96,7 @@ class VerifyUserView(generics.GenericAPIView):
         if 'username' not in serializer.data:
             return Response({'error': 'Запрос без username'}, status=status.HTTP_400_BAD_REQUEST)
         user = get_object_or_404(
-                User, username=serializer.data.get('username'))
+            User, username=serializer.data.get('username'))
         if not default_token_generator.check_token(user, verify_code):
             return Response({'error': f'Код подтверждения неверный!'}, status=status.HTTP_400_BAD_REQUEST)
         user.is_active = True
@@ -145,3 +146,37 @@ class UserViewSet(viewsets.ModelViewSet):
         user = User.objects.get(username=username)
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# ПРОБЛЕМА С IsAuthOrReadOnly
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """Viewset для ревью."""
+    serializer_class = ReviewSerializer
+    #permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        pk = self.kwargs.get('title_id')
+        get_object_or_404(Title, pk=pk)
+        return Review.objects.filter(title__pk=pk)
+
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs['title_id'])
+        serializer.save(author=self.request.user, title=title)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """Viewset для комментариев."""
+    permission_classes = (OnlyAdmin1,)
+    serializer_class = CommentSerializer
+    permission_classes = (OnlyAdmin1,permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        pk = self.kwargs.get('review_id')
+        get_object_or_404(Review, pk=pk)
+        return Comment.objects.filter(review__pk=pk)
+
+    def perform_create(self, serializer):
+        review = get_object_or_404(Review, pk=self.kwargs['review_id'])
+        serializer.save(author=self.request.user, review=review)
