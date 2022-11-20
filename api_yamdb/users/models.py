@@ -22,3 +22,19 @@ class User(AbstractUser):
         blank=False,
         null=True
     )
+
+    @property
+    def check_admin(self):
+        return self.role == 'admin' and self.is_authenticated
+
+    @property
+    def check_moderator(self):
+        return self.role == 'moderator'
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
