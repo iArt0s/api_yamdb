@@ -29,6 +29,7 @@ class IsReviewAndComment(permissions.BasePermission):
                                 or request.user.check_moderator
                                 or request.user.is_staff is True))
 
-        return (
-                    request.method not in permissions.SAFE_METHODS and permission_user
-                    or request.method == ('GET'))
+        return (request.method not in permissions.SAFE_METHODS
+                and permission_user
+                or request.method == ('GET')
+        )
