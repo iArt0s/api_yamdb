@@ -32,4 +32,4 @@ class IsReviewAndComment(permissions.BasePermission):
         return (request.method not in permissions.SAFE_METHODS
                 and permission_user
                 or request.method == ('GET')
-        )
+                )
