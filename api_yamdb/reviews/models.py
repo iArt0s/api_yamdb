@@ -20,6 +20,10 @@ class Genre(models.Model):
         verbose_name='Идентификатор жанра',
     )
 
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
+
     def __str__(self):
         return self.name
 
@@ -36,6 +40,13 @@ class Category(models.Model):
         unique=True,
         verbose_name='Идентификатор категории',
     )
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
 
 
 class Title(models.Model):
@@ -118,6 +129,9 @@ class Review(models.Model):
                 name='nonunique_review_constraint'
             )
         ]
+
+    def __str__(self):
+        return self.text
 
 
 class Comment(models.Model):
