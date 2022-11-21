@@ -10,7 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import IsAdminOrReadOnly, IsOnlyAdmin, IsReviewAndComment
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     GenreSerializer,
     CategorySerializer,
@@ -173,9 +173,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
     )
 
     def get_queryset(self):
-        pk = self.kwargs.get('title_id')
-        get_object_or_404(Title, pk=pk)
-        return Review.objects.filter(title__pk=pk)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -190,9 +189,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     )
 
     def get_queryset(self):
-        pk = self.kwargs.get('review_id')
-        get_object_or_404(Review, pk=pk)
-        return Comment.objects.filter(review__pk=pk)
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs['review_id'])
