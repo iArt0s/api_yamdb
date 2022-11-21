@@ -13,12 +13,15 @@ class Genre(models.Model):
         max_length=256,
         verbose_name='Жанр',
     )
-
     slug = models.SlugField(
         max_length=50,
         unique=True,
         verbose_name='Идентификатор жанра',
     )
+
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name
@@ -37,6 +40,13 @@ class Category(models.Model):
         verbose_name='Идентификатор категории',
     )
 
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+    def __str__(self):
+        return self.name
+
 
 class Title(models.Model):
     """Модель для объявления произведений."""
@@ -48,7 +58,6 @@ class Title(models.Model):
     year = models.IntegerField(
         verbose_name='Дата выхода произведения',
     )
-
     description = models.TextField(
         max_length=500,
         blank=True,
@@ -68,13 +77,6 @@ class Title(models.Model):
         verbose_name='Категория произведения',
     )
 
-    def validate_year(value):
-        """Метод, позволяющий отследить корректный год выпуска произведения."""
-        if value > timezone.now().year:
-            raise ValidationError(
-                {'year': ('Год выпуска не может быть в будущем!')}
-            )
-
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
@@ -82,9 +84,16 @@ class Title(models.Model):
     def __str__(self):
         return self.name
 
+    def validate_year(value):
+        """Метод, позволяющий отследить корректный год выпуска произведения."""
+        if value > timezone.now().year:
+            raise ValidationError(
+                {'year': ('Год выпуска не может быть в будущем!')}
+            )
+
 
 class Review(models.Model):
-    """Модель отзывов."""
+    """Модель для обработки отзызвов к произведениям."""
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -119,9 +128,12 @@ class Review(models.Model):
             )
         ]
 
+    def __str__(self):
+        return self.text
+
 
 class Comment(models.Model):
-    """Модель комментариев."""
+    """Модель для обработки комментариев к отызвам."""
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

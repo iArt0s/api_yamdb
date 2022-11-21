@@ -16,6 +16,12 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'username']
 
+    def validate(self, data):
+        if 'me' == data['username']:
+            raise serializers.ValidationError(
+                'Нельзя создать пользователя с username "me" ')
+        return data
+
 
 class VerifySerializer(serializers.ModelSerializer):
     """(Де-)Сериализатор для модели User приложения users. Аутентификация."""
@@ -40,7 +46,7 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleUnSafeMethodsSerializer(serializers.ModelSerializer):
+class TitlePostSerializer(serializers.ModelSerializer):
     """Стандартный (де-)сериализатор для модели Title приложения reviews."""
 
     genre = SlugRelatedField(
@@ -58,7 +64,7 @@ class TitleUnSafeMethodsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TitleSafeMethodsSerializer(serializers.ModelSerializer):
+class TitleGetSerializer(serializers.ModelSerializer):
     """
     (Де-)Сериализатор для модели Title приложения reviews,
     использующий вложенные сериализаторы.

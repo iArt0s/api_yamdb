@@ -9,13 +9,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .filters import TitleFilter
 from .mixins import ListCreateDestroyViewSet
-from .permissions import IsAdminOrReadOnly, OnlyAdmin, ReviewAndComment
-from reviews.models import Category, Genre, Title, Review, Comment
+from .permissions import IsAdminOrReadOnly, IsOnlyAdmin, IsReviewAndComment
+from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     GenreSerializer,
     CategorySerializer,
-    TitleUnSafeMethodsSerializer,
-    TitleSafeMethodsSerializer,
+    TitleGetSerializer,
+    TitlePostSerializer,
     RegisterSerializer,
     VerifySerializer,
     UserSerializer,
@@ -23,6 +23,7 @@ from .serializers import (
     ReviewSerializer,
     CommentSerializer,
 )
+from api_yamdb.settings import EMAIL_ADMIN
 from users.models import User
 
 
@@ -48,16 +49,16 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Набор представлений для обработки экземпляров модели Title."""
-    serializer_class = TitleUnSafeMethodsSerializer
+    serializer_class = TitlePostSerializer
     permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return TitleUnSafeMethodsSerializer
+            return TitlePostSerializer
 
-        return TitleSafeMethodsSerializer
+        return TitleGetSerializer
 
     def get_queryset(self):
         if self.action in ('retrieve', 'list'):
@@ -75,23 +76,16 @@ class RegisterView(viewsets.ModelViewSet):
     def create(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        if request.data['username'] == 'me':
-            return Response(
-                {'error': 'Нельзя создать пользователя с username "me" '},
-                status=status.HTTP_400_BAD_REQUEST)
         serializer.save()
-        user_data = serializer.data
-        user = User.objects.get(email=user_data['email'])
+        user = User.objects.get(email=serializer.data['email'])
         user.is_active = False
         user.save()
-        user_mail = User.objects.get(email=user_data['email'])
-        user_name = User.objects.get(username=user_data['username'])
-        token = default_token_generator.make_token(user_name)
+        token = default_token_generator.make_token(user)
         send_mail(
-            subject=f'Привет {user_name}!.Код для получения токена.',
+            subject=f'Привет {user.username} ! Код для получения токена.',
             message=f'Код: {token}',
-            from_email='admin@gmail.com',
-            recipient_list=[user_mail.email],
+            from_email=EMAIL_ADMIN,
+            recipient_list=[user.email],
             fail_silently=False,
         )
 
@@ -105,7 +99,6 @@ class VerifyUserView(generics.GenericAPIView):
 
     def post(self, serializer):
         verify_code = serializer.data.get('confirmation_code')
-        print(serializer.data)
         if serializer.data == {}:
             return Response({'error': 'Запрос без параметров'},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -128,7 +121,7 @@ class VerifyUserView(generics.GenericAPIView):
 class UserViewSet(viewsets.ModelViewSet):
     """Набор представлений для обработки экземпляров модели User."""
     queryset = User.objects.all()
-    permission_classes = (OnlyAdmin,)
+    permission_classes = (IsOnlyAdmin,)
     serializer_class = UserSerializer
     filter_backends = (DjangoFilterBackend, filters.SearchFilter,)
     lookup_field = ('username')
@@ -176,13 +169,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Набор представлений для обработки экземпляров модели Review."""
     serializer_class = ReviewSerializer
     permission_classes = (
-        ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
+        IsReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
     )
 
     def get_queryset(self):
-        pk = self.kwargs.get('title_id')
-        get_object_or_404(Title, pk=pk)
-        return Review.objects.filter(title__pk=pk)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.all()
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, pk=self.kwargs['title_id'])
@@ -191,16 +183,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     """Набор представлений для обработки экземпляров модели Comment."""
-    permission_classes = (ReviewAndComment,)
     serializer_class = CommentSerializer
     permission_classes = (
-        ReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
+        IsReviewAndComment, permissions.IsAuthenticatedOrReadOnly,
     )
 
     def get_queryset(self):
-        pk = self.kwargs.get('review_id')
-        get_object_or_404(Review, pk=pk)
-        return Comment.objects.filter(review__pk=pk)
+        review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
+        return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, pk=self.kwargs['review_id'])
