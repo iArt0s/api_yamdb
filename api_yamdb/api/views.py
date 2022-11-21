@@ -4,6 +4,7 @@ from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions, generics, filters
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -127,42 +128,28 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = ('username')
     search_fields = ('=username',)
 
-    def get_permissions(self):
-        if self.kwargs.get('username') == 'me':
-            return (permissions.IsAuthenticated(),)
-        return super().get_permissions()
-
-    def partial_update(self, request, username):
-        if 'me' == username:
-            serializer = SelfUserSerializer(
-                self.request.user, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-        user = User.objects.get(username=username)
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
+    @action(
+        detail=False,
+        methods=['patch', 'get'],
+        url_path='me',
+        permission_classes=(permissions.IsAuthenticated,)
+    )
+    def self_user(self, request):
+        user = self.request.user
+        if request.method == 'GET':
+            serializer = SelfUserSerializer(user)
 
             return Response(serializer.data)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = SelfUserSerializer(
+            self.request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
 
-    def retrieve(self, request, username):
-        user = self.request.user
-        if 'me' != username:
-            user = User.objects.get(username=username)
-        serializer = UserSerializer(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def destroy(self, request, username):
-        if 'me' == username:
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        user = User.objects.get(username=username)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

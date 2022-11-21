@@ -24,11 +24,11 @@ class User(AbstractUser):
     )
 
     @property
-    def check_admin(self):
+    def is_admin(self):
         return self.role == 'admin' and self.is_authenticated
 
     @property
-    def check_moderator(self):
+    def is_moderator(self):
         return self.role == 'moderator'
 
     class Meta:
