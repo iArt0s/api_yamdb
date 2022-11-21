@@ -7,33 +7,27 @@ class IsAdminOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if (request.method in permissions.SAFE_METHODS
                 or request.user.is_authenticated
-                and (request.user.role == 'admin'
+                and (request.user.check_admin
                      or request.user.is_staff is True)):
             return True
 
 
-class OnlyUser(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.user.is_authenticated and request.method == (
-                'GET' or 'PATCH'):
-            return True
-
-
-class OnlyAdmin(permissions.BasePermission):
+class IsOnlyAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if request.user.is_authenticated and (
-                request.user.role == 'admin' or request.user.is_staff is True):
+                request.user.check_admin or request.user.is_staff is True):
             return True
 
 
-class ReviewAndComment(permissions.BasePermission):
+class IsReviewAndComment(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        admin = (request.user.is_authenticated
-                 and (request.user == obj.author
-                      or request.user.role == ('moderator' or 'admin')
-                      or request.user.is_staff is True))
-        return (request.method == 'DELETE' and admin
-                or request.method == 'PATCH' and admin
+        permission_user = (request.user.is_authenticated
+                           and (request.user == obj.author
+                                or request.user.check_admin
+                                or request.user.check_moderator
+                                or request.user.is_staff is True))
+
+        return (request.method not in permissions.SAFE_METHODS and permission_user
                 or request.method == ('GET'))
