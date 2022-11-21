@@ -2,7 +2,7 @@ from rest_framework import permissions
 
 
 class IsAdminOrReadOnly(permissions.BasePermission):
-    """Класс Permission, ограничивающий доступ к UnSAFE methods"""
+    """Класс Permission, ограничивающий доступ к UnSAFE methods."""
 
     def has_permission(self, request, view):
 
@@ -13,6 +13,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
 
 
 class IsOnlyAdmin(permissions.BasePermission):
+    """Класс Permission, доступ для админов."""
 
     def has_permission(self, request, view):
 
@@ -21,6 +22,7 @@ class IsOnlyAdmin(permissions.BasePermission):
 
 
 class IsReviewAndComment(permissions.BasePermission):
+    """Класс Permission, ограничивающий доступ к отзывам и комментам."""
 
     def has_object_permission(self, request, view, obj):
 
